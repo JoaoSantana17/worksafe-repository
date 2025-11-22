@@ -1,14 +1,48 @@
-import { StyleSheet } from 'react-native';
+import { useRouter } from "expo-router";
+import { StyleSheet, Text, View } from "react-native";
+import Card from "../../components/ui/Card";
+import PrimaryButton from "../../components/ui/PrimaryButton";
+import SecondaryButton from "../../components/ui/SecondaryButton";
+import theme from "../../constants/theme";
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+export default function HomeScreen() {
+  const router = useRouter();
 
-export default function TabOneScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
+
+      <Card>
+        <Text style={[theme.typography.h2, { color: theme.colors.text }]}>
+          WorkSafe
+        </Text>
+        <Text style={[theme.typography.body, { marginTop: theme.spacing.sm }]}>
+          Bem-estar no trabalho com monitoramento inteligente.
+        </Text>
+      </Card>
+
+      <View style={styles.row}>
+        <Card>
+          <Text style={theme.typography.label}>Pausas hoje</Text>
+          <Text style={styles.value}>4</Text>
+        </Card>
+
+        <Card>
+          <Text style={theme.typography.label}>Tempo sentado</Text>
+          <Text style={styles.value}>6h 20min</Text>
+        </Card>
+      </View>
+
+      <PrimaryButton
+        title="Gerenciar lembretes"
+        onPress={() => router.push("/(tabs)/reminders")}
+      />
+      <View style={{ height: theme.spacing.sm }} />
+
+      <SecondaryButton
+        title="Ver métricas"
+        onPress={() => router.push("/(tabs)/metrics")}
+      />
+
     </View>
   );
 }
@@ -16,16 +50,17 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: theme.colors.background,
+    padding: theme.spacing.lg,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  row: {
+    flexDirection: "row",
+    gap: theme.spacing.md,
+    marginVertical: theme.spacing.md,
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+  value: {
+    ...theme.typography.h3,
+    color: theme.colors.primaryDark,
+    marginTop: theme.spacing.xs,
   },
 });
