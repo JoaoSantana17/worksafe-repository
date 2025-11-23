@@ -43,18 +43,24 @@ const theme = {
   },
 
   typography: {
-    h2: { fontSize: 22, fontWeight: "700" as const },
-    h3: { fontSize: 18, fontWeight: "600" as const },
+  h2: { fontSize: 22, fontWeight: "700" as const },
+  h3: { fontSize: 18, fontWeight: "600" as const },
 
-    body: { fontSize: 15, color: "#4B5563" },
+  body: { fontSize: 15, color: "#4B5563" },
 
-    label: {
-      fontSize: 12,
-      textTransform: "uppercase" as const,
-      letterSpacing: 0.5,
-      color: "#6B7280",
-    },
+  label: {
+    fontSize: 12,
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
+    color: "#6B7280",
   },
+
+  caption: {
+    fontSize: 12,
+    color: "#6B7280",
+    fontWeight: "400" as const,
+  },
+ },
 };
 
 export default theme;
