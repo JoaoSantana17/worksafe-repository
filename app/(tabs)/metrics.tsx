@@ -1,92 +1,171 @@
-import { StyleSheet, Text, View } from "react-native";
-import Colors from "../../constants/Colors";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
+import Card from "../../components/ui/Card";
+import Chip from "../../components/ui/Chip";
+import PrimaryButton from "../../components/ui/PrimaryButton";
+import theme from "../../constants/theme";
+import { getMetrics, type Metric, } from "../../services/metricsService";
 
 export default function MetricsScreen() {
+  const [metrics, setMetrics] = useState<Metric[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const router = useRouter();
+
+  async function loadData() {
+    try {
+      setLoading(true);
+      const data = await getMetrics();
+      setMetrics(data);
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError("Não foi possível carregar as métricas.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator color={theme.colors.primary} />
+      </View>
+    );
+  }
+
+  const hasData = metrics.length > 0;
+  const last = hasData ? metrics[metrics.length - 1] : null;
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Métricas de Bem-estar</Text>
-      <Text style={styles.subtitle}>
-        Acompanhe como está sua rotina ao longo do dia.
-      </Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Métricas</Text>
 
-      <View style={styles.grid}>
-        <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Pausas hoje</Text>
-          <Text style={styles.metricValue}>4</Text>
-          <Text style={styles.metricHint}>Meta: 5 pausas / dia</Text>
-        </View>
+      <Card>
+        <Text style={styles.cardTitle}>Resumo da jornada</Text>
+        {last ? (
+          <>
+            <Text style={styles.summaryText}>
+              Data: {last.date}
+            </Text>
+            <Text style={styles.summaryText}>
+              Tempo sentado: {last.sittingMinutes} min
+            </Text>
+            <Text style={styles.summaryText}>
+              Pausas: {last.breaksCount}
+            </Text>
+            <Text style={styles.summaryText}>
+              Postura: {last.postureScore}/100
+            </Text>
+            <Text style={styles.summaryText}>
+              Fadiga: {last.fatigueLevel}/10
+            </Text>
+          </>
+        ) : (
+          <Text style={styles.summaryText}>
+            Ainda não há métricas registradas.
+          </Text>
+        )}
+      </Card>
 
-        <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Tempo sentado</Text>
-          <Text style={styles.metricValue}>6h 20min</Text>
-          <Text style={styles.metricHint}>Limite saudável: até 6h</Text>
-        </View>
-      </View>
+      <PrimaryButton
+        title="Registrar métricas"
+        onPress={() => router.push("/metrics/form")}
+      />
 
-      <View style={[styles.metricCard, styles.riskCard]}>
-        <Text style={styles.metricLabel}>Nível de risco</Text>
-        <Text style={styles.riskValue}>Moderado</Text>
-        <Text style={styles.metricHint}>
-          Faça uma pausa de alongamento e beba água nos próximos minutos.
+      {error && <Text style={styles.error}>{error}</Text>}
+
+      {metrics.map(item => (
+        <Card key={item.id}>
+          <View style={styles.rowHeader}>
+            <Text style={styles.cardTitle}>{item.date}</Text>
+            <Chip label={`${item.sittingMinutes} min sentado`} color="primary" />
+          </View>
+
+          <Text style={styles.body}>
+            Pausas: {item.breaksCount} · Postura: {item.postureScore}/100 ·
+            Fadiga: {item.fatigueLevel}/10
+          </Text>
+
+          <View style={styles.footer}>
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: "/metrics/form",
+                  params: { id: String(item.id) },
+                })
+              }
+            >
+              <Text style={styles.link}>Editar</Text>
+            </TouchableOpacity>
+          </View>
+        </Card>
+      ))}
+
+      {!hasData && !error && (
+        <Text style={styles.empty}>
+          Você ainda não registrou nenhuma métrica.
         </Text>
-      </View>
-    </View>
+      )}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
-    padding: 16,
+    backgroundColor: theme.colors.background,
+    padding: theme.spacing.lg,
+  },
+  center: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: Colors.text,
+    ...theme.typography.h2,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.md,
   },
-  subtitle: {
-    fontSize: 14,
-    color: Colors.textMuted,
-    marginTop: 4,
-    marginBottom: 16,
+  cardTitle: {
+    ...theme.typography.h3,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.xs,
   },
-  grid: {
+  summaryText: {
+    ...theme.typography.body,
+    marginTop: theme.spacing.xs,
+  },
+  body: {
+    ...theme.typography.body,
+    marginTop: theme.spacing.xs,
+  },
+  rowHeader: {
     flexDirection: "row",
-    gap: 12,
+    justifyContent: "space-between",
+    alignItems: "center",
   },
-  metricCard: {
-    flex: 1,
-    backgroundColor: Colors.surface,
-    borderRadius: 14,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: Colors.border,
+  footer: {
+    marginTop: theme.spacing.sm,
+    flexDirection: "row",
+    gap: theme.spacing.md,
   },
-  metricLabel: {
-    fontSize: 12,
-    textTransform: "uppercase",
-    color: Colors.textMuted,
+  link: {
+    color: theme.colors.primary,
+    fontSize: 14,
+    fontWeight: "500",
   },
-  metricValue: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: Colors.primaryDark,
-    marginTop: 4,
+  error: {
+    color: theme.colors.danger,
+    marginTop: theme.spacing.sm,
   },
-  metricHint: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    marginTop: 6,
-  },
-  riskCard: {
-    marginTop: 16,
-    borderColor: Colors.accentWarning,
-  },
-  riskValue: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: Colors.accentWarning,
-    marginTop: 4,
+  empty: {
+    marginTop: theme.spacing.lg,
+    color: theme.colors.textMuted,
   },
 });
