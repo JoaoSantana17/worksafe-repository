@@ -1,3 +1,13 @@
+Adão Yuri Ferreira da Silva, RM 559223
+
+João Vitor Lopes Santana, RM 560781
+
+Video YouTube: https://youtu.be/e_VFizqYYKI
+
+ou
+
+https://www.youtube.com/watch?v=e_VFizqYYKI
+
 # **WorkSafe --- Sistema Integrado de Monitoramento Ergonômico e Saúde Ocupacional**
 
 
